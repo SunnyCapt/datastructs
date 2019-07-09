@@ -9,6 +9,7 @@ author: Sunny Capt
 email: sunny.capt@tuta.io
 """
 
+import random
 from typing import List
 
 import math
@@ -64,25 +65,41 @@ class PriorityQueues:
             self._sift_up(it)
 
     def _sift_up(self, it: "Full binary tree node index (first is 1)"):
-        child_i = it - 1
-        parent_i = child_i // 2
-        while self._array[parent_i].priority > self._array[child_i].priority:
-            self._array[parent_i], self._array[child_i] = self._array[child_i], self._array[parent_i]
-            child_i = parent_i
-            parent_i = child_i // 2
+        child = it - 1
+        parent = child // 2
+        while self._array[parent].priority > self._array[child].priority:
+            self._array[parent], self._array[child] = self._array[child], self._array[parent]
+            child = parent
+            parent = child // 2
 
     def _sift_down(self, it: "Full binary tree node index (first is 1)"):
-        pass
+        parent = it - 1
+        child_i = 2 * parent + 1
+        child_j = child_i + 1
+        check = lambda i: i < len(self._array) and self._array[parent].priority > self._array[i].priority
+        while True:
+            if check(child_i):
+                index = child_i
+            if check(child_j):
+                index = child_j if self._array[child_j].priority <= index else index
+            if not (check(child_i) or check(child_j)):
+                break
+            self._array[parent], self._array[index] = self._array[index], self._array[parent]
+            parent = index
+            child_i = 2 * parent + 1
+            child_j = child_i + 1
 
 
 if __name__ == "__main__":
-    array = [str(i) for i in range(100)]
-    matrix = get_graph_matrix(array)
+    queue = PriorityQueues()
+    for _ in range(100):
+        c = random.randint(76, 120)
+        queue.insert(chr(c), c - 66)
+    matrix = get_graph_matrix([elem.obj for elem in queue._array])
     result = []
     w = 2
     ind = 0
-    for i, line in enumerate(matrix[::-1]):
-        c = "|" if i % 2 == 0 else "."
-        result.append(ind * c + (w * c).join(line) + ind * c)
+    for line in matrix[::-1]:
+        result.append(ind * "~" + (w * "~").join(line) + ind * "~")
         ind, w = w - 1, w * 2
     print("\n".join(result[::-1]))
